@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>กองบัญชาการกองทัพไทย | Royal Thai Armed Forces HQ</title>
+<meta name="description" content="ระบบจำลองชีวิตทหารไทย - กองบัญชาการกองทัพไทย">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Trirong:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #060e1f;
+  --navy2: #0c1a36;
+  --navy3: #14294f;
+  --gold: #d4af37;
+  --gold2: #f0d78c;
+  --gold3: #c9a227;
+  --cream: #f4efe4;
+  --steel: #8b97b0;
+  --line: rgba(212,175,55,0.18);
+  --success: #4ade80;
+  --warn: #fbbf24;
+  --danger: #f87171;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sarabun', system-ui, sans-serif;
+  background: var(--navy);
+  color: var(--cream);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+.bg-layer {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(212,175,55,0.12), transparent 50%),
+    radial-gradient(ellipse 70% 40% at 90% 0%, rgba(59,130,246,0.08), transparent 45%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(13,71,161,0.25), transparent 55%),
+    linear-gradient(165deg, #030912 0%, #0a162e 40%, #0c1a36 70%, #060e1f 100%);
+}
+#particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.particle {
+  position: absolute; top: -20px;
+  font-size: 14px; opacity: 0.18;
+  animation: fall linear infinite;
+  filter: drop-shadow(0 0 4px rgba(212,175,55,0.3));
+}
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.22; }
+  90% { opacity: 0.12; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+#intro {
+  position: fixed; inset: 0; z-index: 1000;
+  background: radial-gradient(ellipse at center, #0f2347 0%, #040b18 70%);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s;
+}
+#intro.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+#loading { text-align: center; padding: 24px; }
+#loading.gone { display: none; }
+.loader-ico {
+  font-size: 56px; margin-bottom: 24px;
+  animation: bounce 1.3s ease-in-out infinite;
+  filter: drop-shadow(0 0 16px rgba(212,175,55,0.5));
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  40% { transform: translateY(-16px) scale(1.08); }
+  60% { transform: translateY(-6px); }
+}
+.loader-title {
+  font-family: 'Trirong', serif; font-size: 20px; font-weight: 600;
+  color: var(--gold2); margin-bottom: 6px;
+}
+.loader-sub { font-size: 13px; color: var(--steel); margin-bottom: 32px; }
+.progress-track {
+  width: min(280px, 75vw); height: 6px;
+  background: rgba(255,255,255,0.08); border-radius: 99px;
+  overflow: hidden; border: 1px solid var(--line);
+}
+.progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--gold3), var(--gold), var(--gold2));
+  border-radius: 99px;
+  box-shadow: 0 0 12px rgba(212,175,55,0.5);
+  transition: width 0.12s linear;
+}
+.pct {
+  margin-top: 14px; font-family: 'Trirong', serif;
+  font-size: 26px; font-weight: 700; color: var(--gold);
+}
+.tip { margin-top: 24px; font-size: 12.5px; color: var(--steel); max-width: 280px; margin-left: auto; margin-right: auto; }
+#welcome {
+  display: none; flex-direction: column; align-items: center;
+  text-align: center; padding: 32px 20px; max-width: 480px;
+  animation: fadeUp 0.8s ease;
+}
+#welcome.show { display: flex; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.welcome-badge {
+  width: 68px; height: 68px; border: 2px solid var(--gold);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin-bottom: 20px;
+  background: linear-gradient(145deg, rgba(212,175,55,0.15), transparent);
+  box-shadow: 0 0 28px rgba(212,175,55,0.25);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 18px rgba(212,175,55,0.2); }
+  50% { box-shadow: 0 0 36px rgba(212,175,55,0.45); }
+}
+.welcome-eyebrow { font-size: 12px; color: var(--gold3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.welcome-title {
+  font-family: 'Trirong', serif; font-size: clamp(26px, 6vw, 36px);
+  font-weight: 700; color: var(--gold2); line-height: 1.25; margin-bottom: 6px;
+}
+.welcome-sub { font-size: 15px; color: var(--gold); margin-bottom: 16px; }
+.welcome-desc { font-size: 14px; color: #b8c2d9; line-height: 1.8; margin-bottom: 28px; }
+.emoji-row { display: flex; gap: 12px; font-size: 24px; margin-bottom: 32px; }
+.enter-btn {
+  background: linear-gradient(135deg, var(--gold), var(--gold3));
+  color: var(--navy); border: none; padding: 14px 40px;
+  font-size: 15px; font-weight: 600; border-radius: 8px;
+  cursor: pointer; font-family: 'Sarabun', sans-serif;
+  box-shadow: 0 6px 24px rgba(212,175,55,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.enter-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(212,175,55,0.5); }
+.footer-note { margin-top: 36px; font-size: 11px; color: var(--steel); opacity: 0.7; }
+#app { display: none; position: relative; z-index: 1; }
+#app.ready { display: block; animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.disclaimer {
+  background: #2a1f0a; color: var(--gold2); text-align: center;
+  font-size: 12px; padding: 8px 16px; border-bottom: 1px solid var(--gold3);
+}
+.disclaimer strong { color: var(--gold); }
+nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 24px;
+  background: rgba(6,14,31,0.88);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 34px; height: 34px; border: 1.5px solid var(--gold);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-family: 'Trirong', serif; font-weight: 700; font-size: 14px;
+}
+.brand-text { font-family: 'Trirong', serif; font-weight: 600; font-size: 15px; color: var(--gold2); }
+.nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav-btn {
+  background: none; border: none; color: var(--steel);
+  font-family: 'Sarabun', sans-serif; font-size: 13.5px;
+  padding: 8px 14px; border-radius: 6px; cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-btn:hover { color: var(--gold2); }
+.nav-btn.active {
+  color: var(--navy); background: var(--gold); font-weight: 600;
+  box-shadow: 0 0 14px rgba(212,175,55,0.4);
+}
+.nav-btn .ico { margin-right: 3px; }
+.page { display: none; }
+.page.visible { display: block; animation: pageIn 0.4s ease; }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero {
+  max-width: 780px; margin: 0 auto;
+  padding: 72px 24px 40px; text-align: center;
+}
+.hero-eyebrow { color: var(--gold3); font-size: 13px; letter-spacing: 0.5px; margin-bottom: 14px; }
+.hero h1 {
+  font-family: 'Trirong', serif; font-weight: 700;
+  font-size: clamp(28px, 5vw, 40px); color: var(--gold2);
+  margin-bottom: 10px; line-height: 1.25;
+  text-shadow: 0 0 24px rgba(212,175,55,0.25);
+}
+.hero h2 { font-family: 'Trirong', serif; font-weight: 400; font-size: 17px; color: var(--gold); margin-bottom: 20px; }
+.hero p { font-size: 14.5px; color: #b0bbd4; max-width: 520px; margin: 0 auto 28px; line-height: 1.85; }
+.hero-cta {
+  background: var(--gold); color: var(--navy); border: none;
+  padding: 12px 28px; font-size: 14px; font-weight: 600;
+  border-radius: 6px; cursor: pointer; font-family: 'Sarabun', sans-serif;
+  transition: all 0.2s;
+}
+.hero-cta:hover { background: var(--gold2); transform: translateY(-1px); }
+.branch-wrap { max-width: 480px; margin: 0 auto 60px; padding: 0 24px; }
+.branch-card {
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 28px 22px; text-align: center;
+  background: linear-gradient(180deg, rgba(212,175,55,0.06), transparent);
+  backdrop-filter: blur(8px);
+}
+.branch-card .label { font-family: 'Trirong', serif; font-size: 18px; color: var(--gold2); margin-bottom: 8px; }
+.branch-card .desc { font-size: 13px; color: var(--steel); line-height: 1.75; }
+.home-footer {
+  text-align: center; padding: 24px; font-size: 11.5px; color: var(--steel);
+  border-top: 1px solid var(--line);
+}
+.section-inner { max-width: 1180px; margin: 0 auto; padding: 40px 20px 60px; }
+.section-header { text-align: center; margin-bottom: 20px; }
+.section-header h2 {
+  font-family: 'Trirong', serif; font-size: 24px; color: var(--gold2); margin-bottom: 4px;
+}
+.section-header p { font-size: 13.5px; color: var(--gold); }
+.legend {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+  padding: 12px 0 18px; font-size: 12px; color: var(--gold2);
+}
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+.legend-dot.sat { background: #7dd3fc; }
+.legend-dot.sun { background: #fda4af; }
+.table-wrap {
+  overflow-x: auto; border: 1px solid var(--gold3);
+  border-radius: 12px; background: var(--navy2);
+}
+table { width: 100%; border-collapse: collapse; min-width: 960px; }
+thead th {
+  background: linear-gradient(180deg, var(--gold3), var(--gold));
+  color: var(--navy); font-weight: 700; font-size: 13px;
+  padding: 12px 10px; text-align: center; border: 1px solid #b8912a;
+}
+tbody tr { cursor: pointer; transition: background 0.2s; }
+tbody tr:nth-child(odd) { background: rgba(10,26,54,0.55); }
+tbody tr:nth-child(even) { background: rgba(20,41,92,0.4); }
+tbody tr:hover { background: rgba(212,175,55,0.12); }
+tbody td {
+  color: var(--cream); padding: 11px 10px; font-size: 13px;
+  border: 1px solid var(--line); vertical-align: middle;
+}
+td.center { text-align: center; }
+.day-name { display: block; font-size: 10.5px; font-weight: 600; margin-bottom: 1px; }
+.day-name.sat { color: #7dd3fc; }
+.day-name.sun { color: #fda4af; }
+.order-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--gold); color: var(--navy); font-weight: 700; font-size: 11px;
+}
+.agenda-title { font-weight: 600; color: var(--gold2); }
+.note-text { color: #a8b4cc; font-size: 12px; font-style: italic; }
+.dept-btn {
+  background: none; border: none; padding: 0;
+  color: var(--gold); font-weight: 500; font-size: 13px;
+  font-family: 'Sarabun', sans-serif; text-decoration: underline;
+  text-decoration-color: rgba(212,175,55,0.35); cursor: pointer;
+}
+.dept-btn:hover { color: var(--gold2); }
+.time-tag { display: block; font-size: 10.5px; color: #8fa0c0; margin-top: 1px; }
+.badge {
+  display: inline-block; padding: 4px 12px; border-radius: 20px;
+  font-size: 11.5px; font-weight: 600; white-space: nowrap;
+  background: rgba(248,113,113,0.15); color: #fca5a5; border: 1px solid #f87171;
+}
+.badge-done {
+  background: rgba(74,222,128,0.15) !important;
+  color: #86efac !important; border-color: #4ade80 !important;
+}
+.badge-follow {
+  background: rgba(251,191,36,0.15) !important;
+  color: #fcd34d !important; border-color: #fbbf24 !important;
+}
+.goal-list { display: flex; flex-direction: column; gap: 12px; max-width: 720px; margin: 0 auto; }
+.goal-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px 18px;
+  background: linear-gradient(180deg, rgba(212,175,55,0.05), transparent);
+}
+.goal-num {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+  border: 1.5px solid var(--gold); color: var(--gold2);
+  font-family: 'Trirong', serif; font-weight: 600; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.goal-text h4 { font-family: 'Trirong', serif; font-size: 15px; color: var(--gold2); margin-bottom: 4px; }
+.goal-text p { font-size: 13px; color: #b0bbd4; line-height: 1.7; }
+.board-section { margin-bottom: 32px; }
+.board-section-title {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Trirong', serif; font-size: 16px; font-weight: 600;
+  color: var(--navy); background: linear-gradient(90deg, var(--gold), var(--gold3));
+  padding: 10px 16px; border-radius: 8px; margin-bottom: 12px;
+}
+.board-list { display: flex; flex-direction: column; gap: 8px; }
+.board-item {
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(180deg, rgba(212,175,55,0.05), var(--navy2));
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px 14px; transition: border-color 0.2s, background 0.2s;
+}
+.board-item:hover { border-color: var(--gold); background: rgba(212,175,55,0.08); }
+.board-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(145deg, #3a4558, #1e293b);
+  border: 2px solid rgba(212,175,55,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: var(--gold2);
+  flex-shrink: 0;
+}
+.board-item:hover .board-avatar { border-color: var(--gold); box-shadow: 0 0 10px rgba(212,175,55,0.35); }
+.board-name { font-size: 14px; font-weight: 600; color: var(--cream); }
+.board-role { font-size: 12px; color: var(--gold); }
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(3,8,18,0.78); align-items: center; justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
+.modal-box {
+  background: linear-gradient(180deg, var(--navy3), var(--navy));
+  border: 1px solid var(--gold); border-radius: 14px;
+  max-width: 480px; width: 100%; max-height: min(85vh, 640px);
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  animation: modalIn 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-head {
+  background: linear-gradient(90deg, var(--gold3), var(--gold));
+  padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;
+}
+.modal-head h3 { font-family: 'Trirong', serif; font-size: 16px; color: var(--navy); }
+.modal-close {
+  background: none; border: none; font-size: 20px; color: var(--navy);
+  cursor: pointer; padding: 2px 6px; line-height: 1;
+}
+.modal-body { padding: 18px 18px 24px; overflow-y: auto; }
+.modal-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px;
+}
+.modal-row .k { color: var(--steel); }
+.modal-row .v { color: var(--cream); font-weight: 500; text-align: right; }
+.modal-comment-label { margin: 16px 0 6px; font-size: 12.5px; color: var(--gold); font-weight: 600; }
+.modal-comment {
+  background: rgba(212,175,55,0.06); border: 1px solid var(--line);
+  border-radius: 8px; padding: 12px 14px; font-size: 13px;
+  line-height: 1.65; color: #d4dcec; white-space: pre-line;
+}
+.vc-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #5865F2; color: #fff; padding: 5px 11px; border-radius: 7px;
+  text-decoration: none; font-weight: 700; font-size: 12.5px;
+}
+.page-loader {
+  display: none; position: fixed; inset: 0; z-index: 150;
+  background: rgba(4,10,22,0.88); align-items: center; justify-content: center;
+  flex-direction: column; gap: 14px;
+}
+.page-loader.on { display: flex; }
+.spinner {
+  width: 42px; height: 42px; border: 3px solid rgba(212,175,55,0.2);
+  border-top-color: var(--gold); border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.page-loader-text { font-size: 12.5px; color: var(--gold2); }
+@media (max-width: 640px) {
+  nav { padding: 10px 12px; }
+  .brand-text { display: none; }
+  .hero { padding: 48px 16px 32px; }
+  .nav-btn { padding: 7px 10px; font-size: 12.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div id="particles"></div>
+
+<!-- INTRO -->
+<div id="intro">
+  <div id="loading">
+    <div class="loader-ico" id="main-emoji">🎖️</div>
+    <div class="loader-title">กำลังเตรียมระบบ...</div>
+    <div class="loader-sub">กองบัญชาการกองทัพไทย (จำลองชีวิตทหารไทย)</div>
+    <div class="progress-track"><div class="progress-fill" id="bar"></div></div>
+    <div class="pct" id="pct">1%</div>
+    <div class="tip" id="tip">✨ กำลังตรวจสอบสถานะหน่วยงาน...</div>
+  </div>
+  <div id="welcome">
+    <div class="welcome-badge">🇹🇭</div>
+    <div class="welcome-eyebrow">ยินดีต้อนรับ</div>
+    <h1 class="welcome-title">กองบัญชาการ<br>กองทัพไทย</h1>
+    <div class="welcome-sub">Royal Thai Armed Forces HQ</div>
+    <p class="welcome-desc">ระบบติดตามภารกิจและประชุมกรมในสังกัด<br>พร้อมแล้วสำหรับการจำลองชีวิตทหารไทยของคุณ</p>
+    <div class="emoji-row"><span>🎖️</span><span>🛡️</span><span>✨</span><span>🌟</span><span>💖</span></div>
+    <button class="enter-btn" onclick="enterSystem()">เข้าสู่ระบบ 🚀</button>
+    <div class="footer-note">⚠ เว็บไซต์นี้จัดทำเพื่อการจำลองชีวิตทหารไทย · ไม่ใช่ระบบราชการจริง</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="disclaimer">⚠ เว็บไซต์นี้จัดทำขึ้นเพื่อ<strong>การจำลองชีวิตทหารไทย</strong> ไม่ใช่ระบบหรือข้อมูลของหน่วยงานราชการจริง</div>
+
+  <nav>
+    <div class="brand">
+      <div class="brand-mark">ก</div>
+      <div class="brand-text">กองบัญชาการกองทัพไทย</div>
+    </div>
+    <div class="nav-links">
+      <button class="nav-btn active" data-page="home" onclick="showPage('home')"><span class="ico">🏠</span> หน้าแรก</button>
+      <button class="nav-btn" data-page="table" onclick="showPage('table')"><span class="ico">📊</span> ตารางประชุม</button>
+      <button class="nav-btn" data-page="goals" onclick="showPage('goals')"><span class="ico">🎯</span> เป้าหมาย</button>
+      <button class="nav-btn" data-page="board" onclick="showPage('board')"><span class="ico">👥</span> คณะกองบัญชาการ</button>
+    </div>
+  </nav>
+
+  <!-- HOME -->
+  <section class="page visible" id="page-home">
+    <div class="hero">
+      <div class="hero-eyebrow">ROYAL THAI ARMED FORCES HEADQUARTERS</div>
+      <h1>กองบัญชาการกองทัพไทย</h1>
+      <h2>ระบบติดตามภารกิจและประชุมกรม</h2>
+      <p>ศูนย์กลางการประสานงานและติดตามผลการปฏิบัติงานของกรมต่าง ๆ ในสังกัด<br>สำหรับการจำลองชีวิตทหารไทย</p>
+      <button class="hero-cta" onclick="showPage('table')">ดูตารางประชุม →</button>
+    </div>
+    <div class="branch-wrap">
+      <div class="branch-card">
+        <div class="label">🪖 กองทัพบก</div>
+        <div class="desc">หน่วยหลักในการจำลองชีวิตทหารไทย<br>ครอบคลุมการฝึก การบริหาร และภารกิจประจำ</div>
+      </div>
+    </div>
+    <div class="home-footer">© 2026 กองบัญชาการกองทัพไทย (จำลอง) · สำหรับการเล่นแมพเท่านั้น</div>
+  </section>
+
+  <!-- TABLE -->
+  <section class="page" id="page-table">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>ตารางประชุมประจำเดือน</h2>
+        <p>รายงานสรุปผลการปฏิบัติงาน · กองบัญชาการกองทัพไทย</p>
+      </div>
+      <div class="legend">
+        <span><span class="legend-dot sat"></span> วันเสาร์</span>
+        <span><span class="legend-dot sun"></span> วันอาทิตย์</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ลำดับ</th>
+              <th>วัน/วันที่</th>
+              <th>วาระ</th>
+              <th>หน่วยงาน</th>
+              <th>กำหนดส่ง</th>
+              <th>สถานะ</th>
+              <th>หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- GOALS -->
+  <section class="page" id="page-goals">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>เป้าหมายการประชุม</h2>
+        <p>แนวทางการดำเนินงานของกองบัญชาการ</p>
+      </div>
+      <div class="goal-list">
+        <div class="goal-item">
+          <div class="goal-num">1</div>
+          <div class="goal-text">
+            <h4>ติดตามผลการปฏิบัติงาน</h4>
+            <p>รับทราบและติดตามสรุปผลการปฏิบัติงานประจำสัปดาห์ของทุกกรมในสังกัดอย่างต่อเนื่อง</p>
+          </div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-num">2</div>
+          <div class="goal-text">
+            <h4>แก้ไขปัญหาเร่งด่วน</h4>
+            <p>ระบุประเด็นปัญหาและกำหนดแนวทางแก้ไขพร้อมกำหนดเวลาที่ชัดเจน</p>
+          </div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-num">3</div>
+          <div class="goal-text">
+            <h4>เสริมสร้างวินัยและความสามัคคี</h4>
+            <p>กำชับระเบียบวินัย กำลังพล และการทำงานเป็นทีมของแต่ละกรม</p>
+          </div>
+        </div>
+        <div class="goal-item">
+          <div class="goal-num">4</div>
+          <div class="goal-text">
+            <h4>พัฒนาหลักสูตรและมาตรฐาน</h4>
+            <p>ปรับปรุงหลักสูตรการฝึกให้สอดคล้องกับกฎหมายแมพและมาตรฐานกองบัญชาการ</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOARD -->
+  <section class="page" id="page-board">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>คณะกองบัญชาการ</h2>
+        <p>โครงสร้างอำนวยการกองบัญชาการกองทัพไทย</p>
+      </div>
+      <div class="board-section">
+        <div class="board-section-title">⭐ ผู้บัญชาการสูงสุด</div>
+        <div class="board-list">
+          <div class="board-item">
+            <div class="board-avatar">ก</div>
+            <div>
+              <div class="board-name">พลเอก (จำลอง)</div>
+              <div class="board-role">ผู้บัญชาการกองบัญชาการกองทัพไทย</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="board-section">
+        <div class="board-section-title">🛡️ แม่ทัพภาค</div>
+        <div class="board-list">
+          <div class="board-item"><div class="board-avatar">1</div><div><div class="board-name">พลเอก (ภาค 1)</div><div class="board-role">แม่ทัพภาคที่ 1</div></div></div>
+          <div class="board-item"><div class="board-avatar">2</div><div><div class="board-name">พลเอก killerbird_29</div><div class="board-role">แม่ทัพภาคที่ 2</div></div></div>
+          <div class="board-item"><div class="board-avatar">3</div><div><div class="board-name">พลเอก HKUIHFH</div><div class="board-role">แม่ทัพภาคที่ 3</div></div></div>
+          <div class="board-item"><div class="board-avatar">4</div><div><div class="board-name">พลเอก MonibubiO</div><div class="board-role">แม่ทัพภาคที่ 4</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="m-name">ชื่อกรม</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-row"><span class="k">วันที่ประชุม</span><span class="v" id="m-date">-</span></div>
+      <div class="modal-row"><span class="k">กำหนดส่ง</span><span class="v" id="m-due">-</span></div>
+      <div class="modal-row"><span class="k">สถานะ</span><span class="v"><span class="badge" id="m-status">-</span></span></div>
+      <div class="modal-row">
+        <span class="k">ห้อง VC</span>
+        <span class="v"><a class="vc-link" href="https://discord.gg/wYwNv5MUK" target="_blank" rel="noopener">🔊 เข้าห้อง VC</a></span>
+      </div>
+      <div class="modal-comment-label">ความเห็นของกองบัญชาการ</div>
+      <div class="modal-comment" id="m-comment">-</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-loader" id="loader">
+  <div class="spinner"></div>
+  <div class="page-loader-text">กำลังโหลดหน้า...</div>
+</div>
+
+<script>
+/* Particles */
+(function(){
+  const emojis = ['🎖️','🛡️','⚔️','⭐','✨','🌟','🎯','🚀'];
+  const box = document.getElementById('particles');
+  for(let i=0;i<18;i++){
+    const el = document.createElement('span');
+    el.className = 'particle';
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left = Math.random()*100+'%';
+    el.style.fontSize = (12+Math.random()*14)+'px';
+    el.style.animationDuration = (9+Math.random()*11)+'s';
+    el.style.animationDelay = (Math.random()*10)+'s';
+    box.appendChild(el);
+  }
+})();
+
+/* Intro */
+const tips = [
+  '✨ กำลังตรวจสอบสถานะหน่วยงาน...',
+  '📋 โหลดตารางประชุมประจำเดือน...',
+  '🤝 ประสานงานกับกรมต่าง ๆ...',
+  '🌟 เตรียมข้อมูลเป้าหมาย...',
+  '🛡️ ระบบพร้อมเกือบแล้ว...',
+  '💖 ยินดีต้อนรับนะคะ/ครับ!'
+];
+const emojis = ['🎖️','🛡️','✨','🌟','🚀','💖'];
+let pct = 1;
+const bar = document.getElementById('bar');
+const pctEl = document.getElementById('pct');
+const tipEl = document.getElementById('tip');
+const mainEmoji = document.getElementById('main-emoji');
+
+const iv = setInterval(()=>{
+  const step = pct < 70 ? (1+Math.random()*2) : (2+Math.random()*3);
+  pct = Math.min(100, pct+step);
+  bar.style.width = pct+'%';
+  pctEl.textContent = Math.floor(pct)+'%';
+  tipEl.textContent = tips[Math.min(tips.length-1, Math.floor(pct/18))];
+  if(Math.floor(pct)%17===0) mainEmoji.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+  if(pct>=100){
+    clearInterval(iv);
+    setTimeout(()=>{
+      document.getElementById('loading').classList.add('gone');
+      document.getElementById('welcome').classList.add('show');
+    }, 400);
+  }
+}, 75);
+
+function enterSystem(){
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('app').classList.add('ready');
+  renderTable();
+}
+
+/* Data */
+const deptData = [
+  {
+    name: "กรมยุทธศึกษาทหารบก",
+    day: "sat", dayLabel: "วันเสาร์", date: "05 ก.ย. 2569", due: "05 ก.ย. 2569",
+    time: "21:30 น.",
+    note: "✅ ดำเนินการแล้ว · ⚠️ ยังมีประเด็นติดตาม",
+    status: "ดำเนินการแล้ว",
+    comment: `📋 สรุปการประชุมกรมยุทธศึกษาทหารบก
+📅 ๕ กันยายน ๒๕๖๙  ⏰ ๒๑:๓๐ น.
+
+════════════════════════════════
+💬 ความเห็นกองบัญชาการ
+════════════════════════════════
+⚠️ ยังมีปัญหาหลายเรื่องต้องแก้ไข
+กองบัญชาการรับทราบแล้ว และจะติดตามผลอย่างต่อเนื่อง
+
+════════════════════════════════
+1️⃣ คณะบริหาร
+════════════════════════════════
+• ขาดตำแหน่งรองเสนาธิการ — กำลังจัดหากำลังพล
+• รองผู้บัญชาการ 2 ถนัดงานด้านการฝึกมากกว่าการบริหาร
+  ✅ แก้ไข: ให้คณะบริหารนายอื่นช่วยสอนงาน
+
+════════════════════════════════
+2️⃣ ธุรการ / คัดสรร / ครูฝึก
+════════════════════════════════
+• ไม่ค่อยปฏิบัติหน้าที่
+  ⚠️ เกณฑ์: ผลงาน 10 ครั้ง/สัปดาห์
+  🚨 หากต่ำกว่าเกณฑ์ → ปลดออก
+
+════════════════════════════════
+5️⃣ ปัญหาโดยรวม
+════════════════════════════════
+💰 กำลังพลบางส่วนยังไม่ได้รับเงินเดือนจากคณะบริหารชุดเก่า
+🎮 กำลังพลบางส่วนใช้คำสั่งทีมไม่ได้
+📝 กำลังจัดทำตารางปฏิบัติหน้าที่
+
+════════════════════════════════
+🚨 มาตรการหากไม่พัฒนา
+════════════════════════════════
+📅 วันที่ ๑๓ กันยายน ๒๕๖๙
+   หากกรมยังไม่พัฒนา:
+   🔴 รีเซ็ตตรากรม (ทุกนาย)
+   🔴 รีเซ็ตกำลังพลแผนกต่างๆ
+
+✅ สถานะ: ดำเนินการแล้ว — กองบัญชาการติดตามต่อ`
+  },
+  {
+    name: "กรมสารวัตรทหารบก",
+    day: "sun", dayLabel: "วันอาทิตย์", date: "06 ก.ย. 2569", due: "06 ก.ย. 2569",
+    time: "19:00 น.",
+    note: "✅ ดำเนินการแล้ว · ⚠️ ยังมีประเด็นติดตาม",
+    status: "ดำเนินการแล้ว",
+    comment: `📋 สรุปการประชุมกรมสารวัตรทหารบก (สห.ทบ.)
+📅 ๖ กันยายน ๒๕๖๙  ⏰ ๑๙:๐๐ น.
+
+════════════════════════════════
+💬 ความเห็นกองบัญชาการ
+════════════════════════════════
+⚠️ ยังมีปัญหาหลายเรื่องต้องแก้ไข
+
+📊 สถิติเข้าร่วม: 10/27 นาย
+🔴 ปัญหากำลังพลไม่เพียงพอ
+🚨 เรื่องร้องเรียนจาก ยศ.ทบ. เรื่องลานฝึก
+🗣️ ปัญหาด้านคำพูดของกำลังพล
+
+✅ สถานะ: ดำเนินการแล้ว — ติดตามผลเรื่องลานฝึกต่อเนื่อง`
+  },
+  {
+    name: "กรมการขนส่งทหารบก",
+    day: "sun", dayLabel: "วันอาทิตย์", date: "13 ก.ย. 2569", due: "13 ก.ย. 2569",
+    time: "19:00 น.",
+    note: "⚠️ ติดตามผล · มีประเด็นสำคัญต้องแก้ไขภายใน 16 ก.ย.",
+    status: "ติดตามผล",
+    comment: `📋 สรุปการประชุมกรมการขนส่งทหารบก
+📅 ๑๓ กันยายน ๒๕๖๙  ⏰ ๑๙:๐๐ น.
+
+════════════════════════════════
+💬 ความเห็นกองบัญชาการ
+════════════════════════════════
+⚠️ กรมยังขาดความ Active โดยรวม
+กำลังพลไม่ลงแมพ · หลักสูตรยังไม่ปรับ · คณะบริหารขาดความใส่ใจ
+กองบัญชาการรับทราบแล้ว และกำหนดให้แก้ไขภายในวันพุธที่ ๑๖ ก.ย. ๒๕๖๙
+ตามที่แจ้งใน Discord
+
+════════════════════════════════
+🔴 ปัญหาหลักที่พบ
+════════════════════════════════
+๑. ขาดความ Active
+   • กำลังพลไม่ลงแมพ
+   • ไม่มีการปรับเปลี่ยนหลักสูตร
+   • คณะบริหารขาดความใส่ใจในการบริหาร
+
+๒. หลักสูตรการฝึก
+   • ต้องเปลี่ยนแปลงการฝึกตอนที่ 3 ใหม่
+   • แก้ไขหลักสูตรต่างๆ ให้สอดคล้อง
+   • การฝึกหลักสูตรเข้ากรม ส่วนที่ 3 มาตราที่ 7 การใช้ยานพาหนะ
+     ❌ ไม่ตรงกับการอ้างอิงของกฎหมายแมพ
+   📌 กำหนดแก้ไขให้เสร็จภายใน วันพุธที่ ๑๖ ก.ย. ๒๕๖๙
+
+๓. การรับบริหาร
+   • ยังไม่มีข้อกำหนดชัดเจน
+   ✅ ต้องจัดทำข้อกำหนดการรับบริหารให้ชัดเจนและรายงานกองบัญชาการ
+
+════════════════════════════════
+✅ สิ่งที่ดำเนินการแล้ว / กำลังทำ
+════════════════════════════════
+• มีการเปิดฝึกใบขับขี่
+  📅 วันจันทร์ถึงวันศุกร์
+• กำลังดำเนินการแก้ไขหลักสูตรตามที่กองบัญชาการสั่ง
+
+════════════════════════════════
+🚨 ประเด็นสำคัญ — รองผู้บัญชาการกรม
+════════════════════════════════
+• ยศ: ร้อยเอก
+• ชื่อ: Alevel_VzwEOI
+• ตำแหน่ง: ท. รอง.ผบ.กรม
+• ❌ ผิดข้อกำหนดทางกองบัญชาการ
+  ⚠️ กองบัญชาการกำชับให้ตรวจสอบและรายงานผลกลับโดยด่วน
+
+════════════════════════════════
+📍 หมายเหตุจากกองบัญชาการ
+════════════════════════════════
+ต้องให้กรมขนส่งรายงานผลการบริหารให้กองบัญชาการทราบอย่างต่อเนื่อง
+โดยเฉพาะความคืบหน้าการแก้ไขหลักสูตรและการกำกับดูแลกำลังพล
+
+════════════════════════════════
+⏰ กำหนดเวลา
+════════════════════════════════
+• แก้ไขหลักสูตร + ปรับการฝึกตอนที่ 3 ให้เสร็จภายใน
+  📅 วันพุธที่ ๑๖ กันยายน ๒๕๖๙
+• หากไม่พัฒนาตามกำหนด กองบัญชาการจะพิจารณามาตรการเพิ่มเติม
+
+✅ สถานะ: ติดตามผล — มีทั้งส่วนที่ดำเนินการแล้วและประเด็นที่ต้องแก้ไขเร่งด่วน`
+  },
+  {
+    name: "กรมแพทย์ทหารบก",
+    day: "sat", dayLabel: "วันเสาร์", date: "19 ก.ย. 2569", due: "19 ก.ย. 2569",
+    note: "ต้องนำเรื่องเสนอกองบัญชาการปัญหาต่างๆ",
+    status: "รอดำเนินการ",
+    comment: "กองบัญชาการรับทราบและอยู่ระหว่างรอสรุปข้อมูลเพิ่มเติมจากกรม ก่อนสรุปวาระการประชุมฉบับสมบูรณ์"
+  },
+  {
+    name: "กองร้อยลาดตระเวนระยะไกล",
+    day: "sun", dayLabel: "วันอาทิตย์", date: "20 ก.ย. 2569", due: "20 ก.ย. 2569",
+    note: "ต้องนำเรื่องเสนอกองบัญชาการปัญหาต่างๆ",
+    status: "รอดำเนินการ",
+    comment: "กองบัญชาการขอให้เตรียมสรุปผลภารกิจล่าสุดมาประกอบการรายงานในวันประชุมด้วย"
+  },
+  {
+    name: "กรมทหารปืนใหญ่ที่ 1 รักษาพระองค์",
+    day: "sat", dayLabel: "วันเสาร์", date: "26 ก.ย. 2569", due: "26 ก.ย. 2569",
+    note: "ต้องนำเรื่องเสนอกองบัญชาการปัญหาต่างๆ",
+    status: "รอดำเนินการ",
+    comment: "อยู่ระหว่างรอการตอบรับกำหนดการจากกรม กองบัญชาการจะติดตามผลอีกครั้งก่อนวันประชุม"
+  },
+  {
+    name: "กองพลทหารม้าที่ 2 รักษาพระองค์",
+    day: "sun", dayLabel: "วันอาทิตย์", date: "27 ก.ย. 2569", due: "27 ก.ย. 2569",
+    note: "ต้องนำเรื่องเสนอกองบัญชาการปัญหาต่างๆ",
+    status: "รอดำเนินการ",
+    comment: "เป็นวาระสรุปภาพรวมประจำเดือน กองบัญชาการขอให้เตรียมข้อมูลสรุปผลการดำเนินงานทั้งเดือนมานำเสนอด้วย"
+  }
+];
+
+function renderTable(){
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = deptData.map((d,i) => `
+    <tr tabindex="0" onclick="openModal(\( {i})" onkeypress="if(event.key==='Enter')openModal( \){i})">
+      <td class="center"><span class="order-num">${i+1}</span></td>
+      <td class="center"><span class="day-name \( {d.day}"> \){d.dayLabel}</span>\( {d.date}<span class="time-tag"> \){d.time||'19:00 น.'}</span></td>
+      <td class="agenda-title">รายงานสรุปผลการปฏิบัติงานประจำสัปดาห์</td>
+      <td><button class="dept-btn" onclick="event.stopPropagation();openModal(\( {i})"> \){d.name}</button></td>
+      <td class="center">${d.due}</td>
+      <td class="center"><span class="badge \( {d.status==='ดำเนินการแล้ว'?'badge-done':d.status==='ติดตามผล'?'badge-follow':''}"> \){d.status||'รอดำเนินการ'}</span></td>
+      <td class="note-text">${d.note}</td>
+    </tr>
+  `).join('');
+}
+
+function openModal(i){
+  const d = deptData[i];
+  document.getElementById('m-name').textContent = d.name;
+  document.getElementById('m-date').textContent = d.dayLabel+' '+d.date+(d.time?' ('+d.time+')':'');
+  document.getElementById('m-due').textContent = d.due;
+  const st = document.getElementById('m-status');
+  st.textContent = d.status || 'รอดำเนินการ';
+  st.className = 'badge';
+  if(d.status==='ดำเนินการแล้ว') st.classList.add('badge-done');
+  else if(d.status==='ติดตามผล') st.classList.add('badge-follow');
+  document.getElementById('m-comment').textContent = d.comment;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(e){
+  if(!e || e.target.id==='modal' || e.target.classList.contains('modal-close')){
+    document.getElementById('modal').classList.remove('show');
+  }
+}
+
+function showPage(name){
+  const loader = document.getElementById('loader');
+  loader.classList.add('on');
+  setTimeout(()=>{
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('visible'));
+    document.getElementById('page-'+name).classList.add('visible');
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
+    window.scrollTo({top:0, behavior:'smooth'});
+    loader.classList.remove('on');
+  }, 420);
+}
+</script>
+</body>
+  </html>
